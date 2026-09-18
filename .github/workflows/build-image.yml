@@ -1,0 +1,38 @@
+name: Build custom image
+
+# Builds this branch (evcc 0.315.2 + the schneider-micrologic template) as an
+# arm64 image for a Home Assistant Yellow add-on. Runs on a native arm64 runner,
+# so there is no cross-build or QEMU step. Bump `tag` on every run: Supervisor
+# only re-pulls when the add-on's version string changes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Image tag to publish
+        required: true
+        default: 0.315.2-micrologic.1
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    name: Build and push arm64 image
+    runs-on: ubuntu-24.04-arm
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Log in to ghcr.io
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build and push
+        env:
+          DOCKER_BUILDKIT: "1"
+          IMAGE: ghcr.io/${{ github.repository_owner }}/evcc:${{ inputs.tag }}
+        run: |
+          docker build --build-arg RELEASE=1 --tag "$IMAGE" .
+          docker push "$IMAGE"
+          echo "pushed $IMAGE" >> "$GITHUB_STEP_SUMMARY"
