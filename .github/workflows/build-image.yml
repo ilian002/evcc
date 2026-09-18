@@ -5,13 +5,15 @@ name: Build custom image
 # so there is no cross-build or QEMU step. Bump `tag` on every run: Supervisor
 # only re-pulls when the add-on's version string changes.
 
+# Triggered by pushing this branch: workflow_dispatch would require the file to
+# live on the fork's default branch, and master is kept identical to upstream.
+# Rebuild by bumping IMAGE_TAG below and pushing again.
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: Image tag to publish
-        required: true
-        default: 0.315.2-micrologic.1
+  push:
+    branches: [build/custom-image]
+
+env:
+  IMAGE_TAG: 0.315.2-micrologic.1
 
 permissions:
   contents: read
@@ -31,7 +33,7 @@ jobs:
       - name: Build and push
         env:
           DOCKER_BUILDKIT: "1"
-          IMAGE: ghcr.io/${{ github.repository_owner }}/evcc:${{ inputs.tag }}
+          IMAGE: ghcr.io/${{ github.repository_owner }}/evcc:${{ env.IMAGE_TAG }}
         run: |
           docker build --build-arg RELEASE=1 --tag "$IMAGE" .
           docker push "$IMAGE"
