@@ -1,6 +1,7 @@
 name: Build custom image
 
-# Builds this branch (evcc 0.316.0 + the schneider-micrologic template) as an
+# Builds this branch (evcc 0.316.0 + the schneider-micrologic template as it
+# stands at the head of evcc-io/evcc#33770) as an
 # arm64 image for a Home Assistant Yellow add-on. Runs on a native arm64 runner,
 # so there is no cross-build or QEMU step. Bump `tag` on every run: Supervisor
 # only re-pulls when the add-on's version string changes.
@@ -10,10 +11,10 @@ name: Build custom image
 # Rebuild by bumping IMAGE_TAG below and pushing again.
 on:
   push:
-    branches: [build/custom-image]
+    branches: [build/pr-33770]
 
 env:
-  IMAGE_TAG: 0.316.0-micrologic.1
+  IMAGE_TAG: 0.316.0-pr33770.1
 
 permissions:
   contents: read
